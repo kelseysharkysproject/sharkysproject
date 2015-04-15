@@ -18,7 +18,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -28,7 +27,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
-import com.dataaccess.DbAccessor;
 import com.dataaccess.DbConn;
 
 /**
@@ -65,6 +63,7 @@ public class GamesPanel {
 	private AbstractAction delete;
 	private AbstractAction save;
 	private AbstractAction edit;
+
 	/**
 	 * Constructor for GamesPanel
 	 */
@@ -72,8 +71,8 @@ public class GamesPanel {
 		// create main panel
 		mainPanel = new JPanel();
 		mainPanel.setBorder(null);
-		mainPanel.setPreferredSize(new Dimension(PREF_W,PREF_H));
-		
+		mainPanel.setPreferredSize(new Dimension(PREF_W, PREF_H));
+
 		combinedPanel = new JPanel();
 		combinedPanel.setBorder(null);
 		combinedPanel.setPreferredSize(new Dimension(PREF_W, PREF_H));
@@ -91,9 +90,9 @@ public class GamesPanel {
 		} catch (IOException ex) {
 			System.err.println("Image not found");
 		}
-				table = new JTable(new MyModel(new Object[] { "Game I.D.",
-						"Game Name", "Game Platform", "Edit", "Save", "Delete" }, 0));
-				
+		table = new JTable(new MyModel(new Object[] { "Game I.D.", "Game Name",
+				"Game Platform", "Edit", "Save", "Delete" }, 0));
+
 		addGameButton = new JButton("Add Game");
 		addGameButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -147,17 +146,26 @@ public class GamesPanel {
 						}
 						model.addRow(new Object[] { maxID,
 								gameNameTextField.getText(),
-								platformCombo.getSelectedItem(), "Edit", "Save", deleteIcon });
-						ButtonColumn deletebuttonColumn = new ButtonColumn(table, delete, 5);
-						ButtonColumn editButtonColumn = new ButtonColumn(table, edit, 3);
-						ButtonColumn saveButtonColumn = new ButtonColumn(table, save, 4);
-//						((MyModel) table.getModel()).setRowNumber(model.getRowCount());
-						((MyModel) model).addCell(model.getRowCount()-1,0, false);
-						((MyModel) model).addCell(model.getRowCount()-1,1, false);
-						((MyModel) model).addCell(model.getRowCount()-1,2, false);
-						((MyModel) model).addCell(model.getRowCount()-1,3, true);
-						((MyModel) model).addCell(model.getRowCount()-1,4, true);
-						((MyModel) model).addCell(model.getRowCount()-1,5, true);
+								platformCombo.getSelectedItem(), "Edit",
+								"Save", deleteIcon });
+						ButtonColumn deletebuttonColumn = new ButtonColumn(
+								table, delete, 5);
+						ButtonColumn editButtonColumn = new ButtonColumn(table,
+								edit, 3);
+						ButtonColumn saveButtonColumn = new ButtonColumn(table,
+								save, 4);
+						((MyModel) model).addCell(model.getRowCount() - 1, 0,
+								false);
+						((MyModel) model).addCell(model.getRowCount() - 1, 1,
+								false);
+						((MyModel) model).addCell(model.getRowCount() - 1, 2,
+								false);
+						((MyModel) model).addCell(model.getRowCount() - 1, 3,
+								true);
+						((MyModel) model).addCell(model.getRowCount() - 1, 4,
+								false);
+						((MyModel) model).addCell(model.getRowCount() - 1, 5,
+								true);
 					} catch (SQLException err) {
 						System.err.println(err.getMessage());
 					} finally {
@@ -231,22 +239,35 @@ public class GamesPanel {
 				}
 			}
 		}; // end delete entry from database
+
 		save = new AbstractAction() {
 			public void actionPerformed(ActionEvent e) {
 				int modelRow = Integer.valueOf(e.getActionCommand());
-				if((table.getValueAt(modelRow, 2).equals("Wii") || table.getValueAt(modelRow, 2).equals("Xbox")) && ((String) table.getValueAt(modelRow, 1)).length() < 26){
+				if ((table.getValueAt(modelRow, 2).equals("Wii") || table
+						.getValueAt(modelRow, 2).equals("Xbox"))
+						&& ((String) table.getValueAt(modelRow, 1)).length() < 26) {
 					Connection conn = null;
 					Statement stmt = null;
 					try {
 						DbConn dbConn = new DbConn();
 						conn = dbConn.getConn();
 						stmt = conn.createStatement();
-						stmt.executeUpdate("update s_product set name = '" + table.getValueAt(modelRow, 1) + "' where pno = '"
+						stmt.executeUpdate("update s_product set name = '"
+								+ table.getValueAt(modelRow, 1)
+								+ "' where pno = '"
 								+ table.getValueAt(modelRow, 0) + "'");
-						stmt.executeUpdate("update s_product set platform = '" + table.getValueAt(modelRow, 2) + "' where pno = '"
+						stmt.executeUpdate("update s_product set platform = '"
+								+ table.getValueAt(modelRow, 2)
+								+ "' where pno = '"
 								+ table.getValueAt(modelRow, 0) + "'");
-						((MyModel) table.getModel()).setCellEditable( Integer.valueOf(e.getActionCommand()), 1, false);
-						((MyModel) table.getModel()).setCellEditable( Integer.valueOf(e.getActionCommand()), 2, false);
+						((MyModel) table.getModel())
+								.setCellEditable(
+										Integer.valueOf(e.getActionCommand()),
+										1, false);
+						((MyModel) table.getModel())
+								.setCellEditable(
+										Integer.valueOf(e.getActionCommand()),
+										2, false);
 					} catch (SQLException err) {
 						System.err.println(err.getMessage());
 					} finally {
@@ -270,21 +291,38 @@ public class GamesPanel {
 							DbConn.setConnection(null);
 						}
 					}
-				}else{
-					//custom title, error icon
-					JOptionPane.showMessageDialog(null,
-					    "Error saving. Please make sure that the game name is at most 25" + "\n" + "characters and that the platform is spelled and capitalized correctly.",
-					    "error",
-					    JOptionPane.ERROR_MESSAGE);
+					//make the edit button editable and save button not editable
+					((MyModel) table.getModel()).setCellEditable(
+							Integer.valueOf(e.getActionCommand()), 3, true);
+					((MyModel) table.getModel()).setCellEditable(
+							Integer.valueOf(e.getActionCommand()), 4, false);
+				} else {
+					// custom title, error icon
+					JOptionPane
+							.showMessageDialog(
+									null,
+									"Error saving. Please make sure that the game name is at most 25"
+											+ "\n"
+											+ "characters and that the platform is spelled and capitalized correctly.",
+									"error", JOptionPane.ERROR_MESSAGE);
 				}
-				
+
 			}
 		}; // end save entry from database
+
 		edit = new AbstractAction() {
 			public void actionPerformed(ActionEvent e) {
-				((MyModel) table.getModel()).setCellEditable( Integer.valueOf(e.getActionCommand()), 1, true);
+				// makes the game name and game platform columns editable
+				((MyModel) table.getModel()).setCellEditable(
+						Integer.valueOf(e.getActionCommand()), 1, true);
+				((MyModel) table.getModel()).setCellEditable(
+						Integer.valueOf(e.getActionCommand()), 2, true);
 				
-				((MyModel) table.getModel()).setCellEditable( Integer.valueOf(e.getActionCommand()), 2, true);
+				//make the save button editable and edit button not editable
+				((MyModel) table.getModel()).setCellEditable(
+						Integer.valueOf(e.getActionCommand()), 3, false);
+				((MyModel) table.getModel()).setCellEditable(
+						Integer.valueOf(e.getActionCommand()), 4, true);
 			}
 		}; // end edit entry from database
 
@@ -293,11 +331,11 @@ public class GamesPanel {
 		table.getColumnModel().getColumn(1).setPreferredWidth(NAMECOL_W);
 		table.getColumnModel().getColumn(2).setPreferredWidth(PLATCOL_W);
 		table.setRowHeight(ROW_H);
-		
-		//populate table with existing games
+
+		// populate table with existing games
 		populateTable();
-		
-		//create scroll pane that contains the games list table
+
+		// create scroll pane that contains the games list table
 		JScrollPane tableScrollPane = new JScrollPane(table);
 		tableScrollPane.setBackground(Color.decode("#FFFFFF"));
 		tableScrollPane
@@ -305,9 +343,9 @@ public class GamesPanel {
 		tableScrollPane.setPreferredSize(new Dimension(PREF_W, scrollPane_H));
 
 		// Make delete game column with delete buttons
-		ButtonColumn deletebuttonColumn = new ButtonColumn(table, delete, 5);
 		ButtonColumn editButtonColumn = new ButtonColumn(table, edit, 3);
 		ButtonColumn saveButtonColumn = new ButtonColumn(table, save, 4);
+		ButtonColumn deletebuttonColumn = new ButtonColumn(table, delete, 5);
 
 		// create Buttons Panel with add and print buttons
 		buttonPanel = new JPanel();
@@ -359,15 +397,16 @@ public class GamesPanel {
 				String id = rs.getString("pno");
 				String name = rs.getString("name");
 				String platform = rs.getString("platform");
-				model.addRow(new Object[] { id, name, platform, "Edit", "Save", deleteIcon });
-				((MyModel) model).addCell(model.getRowCount()-1,0, false);
-				((MyModel) model).addCell(model.getRowCount()-1,1, false);
-				((MyModel) model).addCell(model.getRowCount()-1,2, false);
-				((MyModel) model).addCell(model.getRowCount()-1,3, true);
-				((MyModel) model).addCell(model.getRowCount()-1,4, true);
-				((MyModel) model).addCell(model.getRowCount()-1,5, true);
+				model.addRow(new Object[] { id, name, platform, "Edit", "Save",
+						deleteIcon });
+				((MyModel) model).addCell(model.getRowCount() - 1, 0, false);
+				((MyModel) model).addCell(model.getRowCount() - 1, 1, false);
+				((MyModel) model).addCell(model.getRowCount() - 1, 2, false);
+				((MyModel) model).addCell(model.getRowCount() - 1, 3, true);
+				((MyModel) model).addCell(model.getRowCount() - 1, 4, false);
+				((MyModel) model).addCell(model.getRowCount() - 1, 5, true);
 			}
-			
+
 		} catch (SQLException err) {
 			System.err.println(err.getMessage());
 		} finally {
